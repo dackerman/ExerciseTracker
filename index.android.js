@@ -17,6 +17,8 @@ import React, {
     Navigator
 } from 'react-native';
 
+import {Page} from './components/Page';
+
 var WorkoutDB = function() {
     var db = {
         '2016-05-13': {
@@ -73,16 +75,7 @@ var ExerciseView = React.createClass({
         );
         
         return (
-            <View style={styles.container}>
-              <ToolbarAndroid
-                style={styles.toolbar}
-                logo={require('./dumbbell-icon.png')}
-                actions={[{title: 'Home'}]} />
-              <View style={styles.topbar}>
-                <Text style={styles.topbarTitle}>
-                  Dumbbell Shoulder Press {theDate}
-                </Text>
-              </View>
+            <Page title={"Dumbbell Shoulder Press " + theDate}>
               <ListView
                 dataSource={this.state.dataSource}
                 renderRow={renderRow}
@@ -94,7 +87,7 @@ var ExerciseView = React.createClass({
                   <Text style={{fontSize: 25, color: 'white'}}>ADD SET</Text>
                 </View>
               </TouchableNativeFeedback>
-            </View>
+            </Page>
         );
     },
     
@@ -145,25 +138,6 @@ var ExerciseView = React.createClass({
         });
     }
 });
-
-class Page extends React.Component {
-    render() {
-        return (
-            <View style={styles.container}>
-              <ToolbarAndroid
-                style={styles.toolbar}
-                logo={require('./dumbbell-icon.png')}
-                actions={[{title: 'Home'}]} />
-              <View style={styles.topbar}>
-                <Text style={styles.topbarTitle}>
-                  {this.props.title}
-                </Text>
-              </View>
-              {this.props.children}
-            </View>
-        );        
-    }
-}
 
 class ExerciseCalendar extends React.Component {
     goToOtherPage(navigator, theDate) {
@@ -253,10 +227,6 @@ var ExerciseTracker = React.createClass({
 });
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-    },
-
     listRow: {
         height: 70,
         padding: 5,
@@ -268,24 +238,6 @@ const styles = StyleSheet.create({
     calendarWeek: {
         flex: 1,
         flexDirection: 'row'
-    },
-
-    topbar: {
-        height: 80,
-        justifyContent: 'flex-end',
-        backgroundColor: '#44aaee',
-    },
-
-    toolbar: {
-        height: 50,
-        backgroundColor: '#44aaee',        
-    },
-
-    topbarTitle: {
-        fontSize: 25,
-        textAlign: 'center',
-        margin: 10,
-        color: 'white'
     },
 
     addButton: {
