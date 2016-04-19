@@ -17,21 +17,38 @@ import React, {
     Navigator
 } from 'react-native';
 
+var WorkoutDB = function() {
+    var db = {
+        '2016-05-13': {
+            sets: [
+                { reps: 10, weight: 25 },
+                { reps: 8, weight: 35 },
+                { reps: 8, weight: 30 },
+                { reps: 8, weight: 30 }
+            ]
+        }
+    };
+    return {
+        setsForDay(day) {
+            db[day] = db[day] || {sets: []};
+            return db[day];
+        }
+    };
+}();
+
 var ExerciseView = React.createClass({
     getInitialState: function() {
         var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-        const sets = [
-            { reps: 10, weight: 25 },
-            { reps: 8, weight: 35 },
-            { reps: 8, weight: 30 },
-            { reps: 8, weight: 30 }
-        ];
+        const theDate = this.props.forDate;
+        const day = WorkoutDB.setsForDay(theDate);
         return {
-            sets: sets,
-            dataSource: ds.cloneWithRows(sets),
+            sets: day.sets,
+            dataSource: ds.cloneWithRows(day.sets),
         };
     },
+    
     render() {
+        const theDate = this.props.forDate;
         const renderRow = (rowData, sectionID, rowID) => (
             <View style={styles.listRow}>
               <Text>{String(parseInt(rowID) + 1)}</Text>
@@ -63,7 +80,7 @@ var ExerciseView = React.createClass({
                 actions={[{title: 'Home'}]} />
               <View style={styles.topbar}>
                 <Text style={styles.topbarTitle}>
-                  Dumbbell Shoulder Press {this.props.blerga}
+                  Dumbbell Shoulder Press {theDate}
                 </Text>
               </View>
               <ListView
@@ -149,8 +166,8 @@ class Page extends React.Component {
 }
 
 class ExerciseCalendar extends React.Component {
-    goToOtherPage(navigator) {
-        navigator.push({name: 'exercise', index: 1});
+    goToOtherPage(navigator, theDate) {
+        navigator.push({name: 'exercise', date: theDate});
     }
     render() {
         const row = (week, columns) => (
@@ -161,18 +178,28 @@ class ExerciseCalendar extends React.Component {
 
         const cell = (dayi, week) => {
             let day = week * 7 + dayi;
+            const theDate = '2016-05-' + day;
             const color = day % 2 ? '#fafaff' : '#ffffff';
+            const sets = WorkoutDB.setsForDay(theDate).sets;
+            const mark = sets.length ? <Text>X</Text> : <Text></Text>;
             return (
                 <TouchableNativeFeedback
                   key={day+week}
-                  onPress={() => this.goToOtherPage(this.props.nav)}
+                  onPress={() => this.goToOtherPage(this.props.nav, theDate)}
                   background={TouchableNativeFeedback.SelectableBackground()}>
                   <View style={{flex: 1, height:60, paddingLeft: 3, backgroundColor: color}}>
                     <Text>{day}</Text>
+                    {mark}
                   </View>
                 </TouchableNativeFeedback>
             );
         }
+
+        const header = ['Sun', 'Mon', 'Tues', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
+            <View key={day} style={{flex: 1}}>
+              <Text style={{color: '#dfeefe'}}>{day}</Text>
+            </View>
+        ));
         
         const rows = [];
         for (var week = 0; week < 5; week++) {
@@ -185,6 +212,10 @@ class ExerciseCalendar extends React.Component {
         
         return (
             <View>
+              <Text style={{fontSize: 30, textAlign: 'center', backgroundColor: '#332322', color: '#dfeefe'}}>&lt;   April   &gt;</Text>
+              <View style={{flex: 1, flexDirection: 'row', backgroundColor: '#332322'}}>
+                {header}
+              </View>
               {rows}
             </View>
         );
@@ -205,13 +236,13 @@ var ExerciseTracker = React.createClass({
     render() {
         return (
             <Navigator
-              initialRoute={{name: 'home', index: 0}}
+              initialRoute={{name: 'home'}}
               renderScene={(route, navigator) => {
                   switch (route.name) {
                   case 'home':
                       return <HomePage nav={navigator} />
                   case 'exercise':
-                      return <ExerciseView />
+                      return <ExerciseView forDate={route.date} />
                   default:
                       return <HomePage />
                   }
@@ -225,6 +256,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+
     listRow: {
         height: 70,
         padding: 5,
@@ -232,25 +264,30 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-around'
     },
+
     calendarWeek: {
         flex: 1,
         flexDirection: 'row'
     },
+
     topbar: {
         height: 80,
         justifyContent: 'flex-end',
         backgroundColor: '#44aaee',
     },
+
     toolbar: {
         height: 50,
         backgroundColor: '#44aaee',        
     },
+
     topbarTitle: {
         fontSize: 25,
         textAlign: 'center',
         margin: 10,
         color: 'white'
     },
+
     addButton: {
         backgroundColor: '#ee3322',
         height: 50,
