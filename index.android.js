@@ -22,7 +22,7 @@ function ExerciseTracker() {
       case 'exercise':
         return <ExerciseView forDate={route.date} />;
       default:
-        return <HomePage />;
+        throw "No route registered for name " + route.name;
     }
   }
   
